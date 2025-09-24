@@ -6,38 +6,41 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
 
-LOGS_FOLDER="/var/log/roboshop-shellscript"
-SCRIPT_NAME=$( echo $0 | cut -d "." -f1 ) #current script name=mongodb.sh
-LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log" #/var/log/roboshop-shellscript/mongodb.log
+LOGS_FOLDER="/var/log/shell-roboshop"
+SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
+LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log" # /var/log/shell-script/16-logs.log
 
-mkdir -p $LOGS_FOLDER 
-echo "script started executed at: $(date)" | tee -a $LOG_FILE # tee is a splitter for output, it saves the input in file
+mkdir -p $LOGS_FOLDER
+echo "Script started executed at: $(date)" | tee -a $LOG_FILE 
 
 if [ $USERID -ne 0 ]; then
-    echo "run script with root access"
-    exit 1
+    echo "ERROR:: Please run this script with root privelege"
+    exit 1 # failure is other than 0
 fi
 
-VALIDATE(){
+VALIDATE(){ # functions receive inputs through args just like shell script args
     if [ $1 -ne 0 ]; then
-    echo -e "$2....$R FAILURE $N" | tee -a $LOGS_FILE
-    exit 1
-    else 
-    echo -e "$2....$R SUCCESS $N" | tee -a $LOGS_FILE
+        echo -e "$2 ... $R FAILURE $N" | tee -a $LOG_FILE
+        exit 1
+    else
+        echo -e "$2 ... $G SUCCESS $N" | tee -a $LOG_FILE # tee is a output splitter, it saves input in file
     fi
 }
 
-cp mongo.repo /etc/yum/repos.d/mongo.repo
-VALIDATE $? "adding mongo repo"
+cp mongo.repo /etc/yum.repos.d/mongo.repo
+VALIDATE $? "Adding Mongo repo"
 
 dnf install mongodb-org -y &>>$LOG_FILE
-VALIDATE $? "installing mongodb server"
+VALIDATE $? "Installing MongoDB"
 
 systemctl enable mongod &>>$LOG_FILE
-VALIDATE $? "starting mongodb"
+VALIDATE $? "Enable MongoDB"
+
+systemctl start mongod 
+VALIDATE $? "Start MongoDB"
 
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
-VALIDATE $? "allowing remote connections to momgodb"
+VALIDATE $? "Allowing remote connections to MongoDB"
 
-systemctl restart mongod &>>$LOG_FILE
-VALIDATE $? "restarting mongodb"
+systemctl restart mongod
+VALIDATE $? "Restarted MongoDB"
