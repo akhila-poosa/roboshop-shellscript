@@ -15,19 +15,20 @@ LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
 mkdir -p $LOGS_FOLDER
 echo "script started executing at: $(date)" | tee -a $LOG_FILE
 
-if [ $USEROD -ne 0 ]; then
+if [ $USERID -ne 0 ]; then
     echo " run the script with root access"
     exit 1
 fi
 
-VALIDATE (){
+VALIDATE(){ 
     if [ $1 -ne 0 ]; then
-        echo -e "$2.....$R FAILURE $N" | tee -a $LOG_FILE
+        echo -e "$2 ... $R FAILURE $N" | tee -a $LOG_FILE
         exit 1
-    else 
-        echo -e "$2.....$R SCUCCESS $N" | tee -a $LOG_FILE
+    else
+        echo -e "$2 ... $G SUCCESS $N" | tee -a $LOG_FILE
     fi
 }
+
 
 # NODES JS installation
 
