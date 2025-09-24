@@ -28,10 +28,7 @@ VALIDATE(){
         echo -e "$2 ... $G SUCCESS $N" | tee -a $LOG_FILE
     fi
 }
-
-
-# NODES JS installation
-
+##### NodeJS ####
 dnf module disable nodejs -y &>>$LOG_FILE
 VALIDATE $? "Disabling NodeJS"
 
@@ -46,23 +43,23 @@ id roboshop &>>$LOG_FILE
 if [ $? -ne 0 ]; then
     useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
     VALIDATE $? "Creating system user"
-else 
+else
     echo -e "User already exist ... $Y SKIPPING $N"
 fi
 
 mkdir -p /app
-VALIDATE "creating app directory"
+VALIDATE $? "Creating app directory"
 
 curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>>$LOG_FILE
 VALIDATE $? "Downloading catalogue application"
 
-cd /app
+cd /app 
 VALIDATE $? "Changing to app directory"
 
 rm -rf /app/*
-VALIDATE $? "removing existing code"
+VALIDATE $? "Removing existing code"
 
-unzip /tmp/catalogue.zip
+unzip /tmp/catalogue.zip &>>$LOG_FILE
 VALIDATE $? "unzip catalogue"
 
 npm install &>>$LOG_FILE
@@ -81,7 +78,7 @@ VALIDATE $? "Copy mongo repo"
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "Install MongoDB client"
 
-INDEX=$(mongosh mongodb.daws86s.fun --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')")
+INDEX=$(mongosh mongodb.zealful.space --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')")
 if [ $INDEX -le 0 ]; then
     mongosh --host $MONGODB_HOST </app/db/master-data.js &>>$LOG_FILE
     VALIDATE $? "Load catalogue products"
